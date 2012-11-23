@@ -72,5 +72,10 @@
 	<version>1.06</version>
 	<type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>com.naef</groupId>
+      <artifactId>jnlua</artifactId>
+      <version>0.9.5</version>
+    </dependency>
   </dependencies>
 </project>

@@ -28,6 +28,14 @@ public class SkypeBot
     {	
 	// Загружаем конфиг
 	LoadConfig();
+	
+	// Check lua dirrectory
+	File f = new File("lua/");
+	System.out.println(f.getPath() + ": is path");
+	if(!f.exists()) {
+	    f.mkdir();
+	}
+	
 	// Создаем листенер сообщений:
 	try {
 	    Skype.addChatMessageListener(new ChatMessageListener());

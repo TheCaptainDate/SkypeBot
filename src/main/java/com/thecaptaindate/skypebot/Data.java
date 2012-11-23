@@ -8,6 +8,8 @@
 package com.thecaptaindate.skypebot;
 
 import com.esotericsoftware.yamlbeans.YamlWriter;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ public class Data {
     public static Data self;
     private HashMap<String, String> channels;
     private String password;
+    private ArrayList<String> commands;
     
     // Создаем новый класс
     public Data() {
@@ -35,6 +38,7 @@ public class Data {
 	r = new Random();
 	channels = new HashMap<String, String>();
 	password = "CHANGEIT";
+	commands = new ArrayList<String>();
     }
     
     public void addPhrase(String question, String[] answer) {
@@ -79,10 +83,42 @@ public class Data {
 	return password;
     }
     
+    public boolean hasCommand(String cmd) {
+	if(commands.contains(cmd)) {
+	    return true;
+	}
+	
+	return false;
+    }
+    
+    public void addCommand(String cmd) {
+	commands.add(cmd);
+	File f = new File("lua" + File.separator + cmd + ".lua");
+	
+	if(!f.exists()) {
+	    try {
+		System.out.println("Can't find file for " + cmd + "... So, let's create it!");
+		FileWriter w = new FileWriter(f);
+		BufferedWriter l = new BufferedWriter(w);
+		
+		l.write("function invoke(args)");
+		l.newLine();
+		l.write("-- args - array of arguments");
+		l.newLine();
+		l.write("end");
+		l.close();
+	    } catch (IOException ex) {
+		Logger.getLogger(Data.class.getName()).log(Level.SEVERE, "Can't create lua file for: " + cmd, ex);
+	    }
+	}
+	
+	save();
+    }
+    
     public void save() {
 	try {
 	    YamlWriter writer = new YamlWriter(new FileWriter("config.yml"));
-	    writer.write(this);
+	    writer.write(self);
 	    writer.close();
 	} catch (IOException ex) {
 	    Logger.getLogger(Data.class.getName()).log(Level.WARNING, "Can't write config.yml!", ex);
