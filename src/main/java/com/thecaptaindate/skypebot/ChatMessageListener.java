@@ -22,39 +22,41 @@ public class ChatMessageListener extends ChatMessageAdapter {
     @Override
     public void chatMessageReceived(ChatMessage msg) throws SkypeException {
 	if(msg.getType().equals(ChatMessage.Type.SAID)) {
-	    if(x == 1) {
-		x = 0;
+	    if(x == 0) {
+		x = x + 1;
 		return;
+	    } else if(x == 1) {
+		x = 0;
 	    }
 	    
-	    String cmd = msg.getContent().toLowerCase();
+	    String cmd = msg.getContent();
 	    ArrayList<String> c = getCmd(cmd);
 	    Chat chat = msg.getChat();
+	    String test = msg.getChat().getId();
 	    
 	    if(cmd.startsWith(">")) {
-		if(!SkypeBot.data.isAdmin(msg.getSender().getId())) {
+		/*if(!Data.self.isAdmin(msg.getSender().getId())) {
 		    return;
-		}
+		}*/
 		
-		c.set(0, c.get(0).substring(1));
+		c.set(0, c.get(0).substring(1).toLowerCase());
 		
 		if(c.get(0).equals("teach") & c.size() >= 3) {
-		    String question = c.get(1);
-		    c.remove(0);
-		    c.remove(1);
-		    SkypeBot.data.addPhrase(question, c.toArray(new String[c.size()]));
+		    String question = c.get(1).toLowerCase();
+		    List<String> l = c.subList(2, c.size());
+		    Data.self.addPhrase(question, l.toArray(new String[l.size()]));
+		} else if(c.get(0).equals("admin") & c.size() >= 2) {
+		    Data.self.addAdmin(msg.getSender().getId());
+		} else if(c.get(0).equals("channel") & c.size() >= 2) {
+		    Data.self.setChannel(msg.getChat().getId(), c.get(1));
 		}
-		
-		if(c.get(0).equals("admin"))
 	    } else if(cmd.startsWith("!")) {
 		c.set(0, c.get(0).substring(1));
 		
 	    } else if(c.get(0).equals("бот,")) {
 		c.remove(0);
-		chat.send(SkypeBot.data.getPhrase(concat(c, " ")));
+		chat.send(Data.self.getPhrase(concat(c, " ")));
 	    }
-	    
-	    x = x + 1;
 	}
     }
     

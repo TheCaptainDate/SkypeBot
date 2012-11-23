@@ -16,16 +16,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SkypeBot 
-{
-    
-    public static Data data;
-    
+{   
     public static void main( String[] args )
     {	
 	// Загружаем конфиг
@@ -53,7 +51,7 @@ public class SkypeBot
 	try {
 	    if(new File("config.yml").exists()) {
 		YamlReader reader = new YamlReader(new FileReader("config.yml"));
-		data = (Data) reader.read();
+		Data.self = (Data) reader.read();
 		reader.close();
 	    } else {
 		CreateConfig();
@@ -67,7 +65,42 @@ public class SkypeBot
     
     // Функция создания конфига
     private static void CreateConfig() {
-	data = new Data();
-	data.save();
+	Data.self = new Data();
+	Data.self.save();
+    }
+    
+    public static void SendMessage(String content, String channel) {
+	try {
+	    Chat[] chats = Skype.getAllChats();
+	    
+	    for (Chat chat : chats) {
+		String cnl = Data.self.getChannel(chat.getId());
+		
+		if(cnl.equalsIgnoreCase(channel) || cnl.equalsIgnoreCase("all")) {
+		    chat.send(content);
+		}
+	    }
+	} catch (SkypeException ex) {
+	    Logger.getLogger(SkypeBot.class.getName()).log(Level.SEVERE, "Some error with skype: ", ex);
+	}
+    }
+    
+    public static void SocketDecoder(String line, PrintWriter w) {
+	if(line.contains("<split>")) {
+	    String[] args = line.split("<split>");
+	    
+	    if(args.length == 3) {
+		if(args[0].equals(Data.self.getPassword())) {
+		    SendMessage(args[2], args[1]);
+		    w.print("OK");
+		} else {
+		    w.println("Wrong password!");
+		}
+	    } else {
+		w.println("Wrong format");
+	    }
+	} else {
+	    w.println("Wrong password");
+	}
     }
 }

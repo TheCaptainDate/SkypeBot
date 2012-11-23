@@ -34,9 +34,8 @@ public class SocketQuery extends Thread {
 	    BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 
 	    String input = in.readLine();
-	    out.println("YO NIGGER!");
 	    
-	    System.out.println("Client: " + input);
+	    SkypeBot.SocketDecoder(input, out);
 	    
 	    out.close();
 	    in.close();

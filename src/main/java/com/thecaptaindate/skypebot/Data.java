@@ -23,22 +23,25 @@ public class Data {
     private ArrayList<String> admins;
     private HashMap<String, String[]> phrases;
     private Random r;
+    public static Data self;
+    private HashMap<String, String> channels;
+    private String password;
     
     // Создаем новый класс
     public Data() {
 	admins = new ArrayList<String>();
+	admins.add("max---855");
 	phrases = new HashMap<String, String[]>();
 	r = new Random();
+	channels = new HashMap<String, String>();
+	password = "CHANGEIT";
     }
     
     public void addPhrase(String question, String[] answer) {
-	System.out.println("Save:" + question + ";");
 	phrases.put(question, answer);
     }
     
     public String getPhrase(String question) {
-	System.out.println("Get:" + question + ";");
-	
 	if(phrases.containsKey(question)) {
 	    return phrases.get(question)[r.nextInt(phrases.size())];
 	} else {
@@ -57,6 +60,23 @@ public class Data {
 	}
 	
 	return false;
+    }
+    
+    public String getChannel(String chatID) {
+	if(channels.containsKey(chatID)) {
+	    return channels.get(chatID);
+	}
+	
+	return "none";
+    }
+    
+    public void setChannel(String key, String channel) {
+	channels.put(key, channel);
+	save();
+    }
+    
+    public String getPassword() {
+	return password;
     }
     
     public void save() {
