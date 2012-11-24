@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 
 public class Data {
     
-    public ArrayList<String> admins;
+    public HashMap<String, String> ranks;
     public HashMap<String, String[]> phrases;
     private Random r;
     public static Data self;
@@ -32,8 +32,8 @@ public class Data {
     
     // Создаем новый класс
     public Data() {
-	admins = new ArrayList<String>();
-	admins.add("max---855");
+	ranks = new HashMap<String, String>();
+	ranks.put("max---855", "admin");
 	phrases = new HashMap<String, String[]>();
 	r = new Random();
 	channels = new HashMap<String, String>();
@@ -54,12 +54,25 @@ public class Data {
     }
     
     public void addAdmin(String login) {
-	admins.add(login);
+	ranks.put(login, "admin");
 	save();
     }
     
+    public void addModerator(String login) {
+	ranks.put(login, "moderator");
+	save();
+    }
+    
+    public boolean isModerator(String login) {
+	if(ranks.get(login).equals("admin") || ranks.get(login).equals("moderator")) {
+	    return true;
+	}
+	
+	return false;
+    }
+    
     public boolean isAdmin(String login) {
-	if(admins.contains(login)) {
+	if(ranks.get(login).equals("admin")) {
 	    return true;
 	}
 	
