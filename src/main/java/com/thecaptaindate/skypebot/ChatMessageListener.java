@@ -14,7 +14,6 @@ import com.skype.ChatMessageAdapter;
 import com.skype.SkypeException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +76,11 @@ public class ChatMessageListener extends ChatMessageAdapter {
 	    
 	    ArrayList<String> c = getCmd(msg.getContent());
 	    Chat chat = msg.getChat();
+	    
+	    if(msg.getContent().length() < 2) {
+		return;
+	    }
+	    
 	    String perfix = msg.getContent().substring(0, 1);
 	    String cmd = c.get(0).substring(1).toLowerCase();
 	    c.remove(0);
@@ -86,12 +90,16 @@ public class ChatMessageListener extends ChatMessageAdapter {
 		    return;
 		}*/
 		
-		if(cmd.equals("teach") & c.size() >= 2) {
+		if(cmd.equals("teach") & c.size() >= 2 & Data.self.isModerator(msg.getSenderId())) {
 		    String question = c.get(0).toLowerCase();
 		    List<String> l = c.subList(1, c.size());
 		    Data.self.addPhrase(question, l.toArray(new String[l.size()]));
-		} else if(cmd.equals("admin") & c.size() >= 1) {
-		    Data.self.addAdmin(msg.getSender().getId());
+		} else if(cmd.equals("rank") & c.size() >= 2 & Data.self.isAdmin(msg.getSenderId())) {
+		    if(c.get(1).equals("admin")) {
+			Data.self.addAdmin(c.get(1));
+		    } else if(c.get(1).equals("moderator")) {
+			Data.self.addModerator(c.get(1));
+		    }
 		} else if(cmd.equals("channel") & c.size() >= 1) {
 		    Data.self.setChannel(msg.getChat().getId(), c.get(0));
 		} else if(cmd.equals("addcommand") & c.size() >= 1) {
@@ -106,22 +114,21 @@ public class ChatMessageListener extends ChatMessageAdapter {
 		    File l = new File("lua" + File.separator + cmd + ".lua");
 		    
 		    if(l.exists()) {
+			LuaState ls = new LuaState();
 			try {
-			    LuaState ls = new LuaState();
 			    ls.load(new FileInputStream(l), cmd);
+			    ls.openLibs();
 			    ls.call(0, 0);
 			    ls.getGlobal("invoke");
+			    
 			    ls.pushJavaObject(c);
-			    ls.pushJavaObject(msg);
+			    ls.pushJavaObject(new LuaSkypeWrapper(msg));
+			    ls.call(2, 0);
 			    
-			    int r = ls.toInteger(1);
-			    ls.pop(1);
-			    
-			    if(r == 0) {
-				System.out.println("Error in " + cmd + ".lua");
-			    }
 			} catch (Exception ex) {
 			    Logger.getLogger(ChatMessageListener.class.getName()).log(Level.SEVERE, "Some error with lua", ex);
+			} finally {
+			    ls.close();
 			}
 		    } else {
 			Data.self.addCommand(cmd);

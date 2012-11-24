@@ -34,6 +34,7 @@ public class Data {
     public Data() {
 	ranks = new HashMap<String, String>();
 	ranks.put("max---855", "admin");
+	ranks.put("dark_measures", "admin");
 	phrases = new HashMap<String, String[]>();
 	r = new Random();
 	channels = new HashMap<String, String>();
@@ -64,16 +65,20 @@ public class Data {
     }
     
     public boolean isModerator(String login) {
-	if(ranks.get(login).equals("admin") || ranks.get(login).equals("moderator")) {
-	    return true;
+	if(ranks.containsKey(login)) {
+	    if(ranks.get(login).equals("admin") || ranks.get(login).equals("moderator")) {
+		return true;
+	    }
 	}
 	
 	return false;
     }
     
     public boolean isAdmin(String login) {
-	if(ranks.get(login).equals("admin")) {
-	    return true;
+	if(ranks.containsKey(login)) {
+	    if(ranks.get(login).equals("admin")) {
+		return true;
+	    }
 	}
 	
 	return false;
@@ -122,6 +127,7 @@ public class Data {
 		l.newLine();
 		l.write("   -- msg - java message object");
 		l.newLine();
+		l.write("   msg:answer(\"Yo, it's '"+cmd+"'! And this message sended directly from lua script... So, it's cool! \")");
 		l.write("end");
 		l.close();
 	    } catch (IOException ex) {
