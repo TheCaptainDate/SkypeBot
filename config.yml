@@ -1,1 +1,3 @@
-!com.thecaptaindate.skypebot.Data {}
+!com.thecaptaindate.skypebot.Data
+commands: 
+- test

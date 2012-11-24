@@ -112,7 +112,7 @@ public class ChatMessageListener extends ChatMessageAdapter {
 			    ls.call(0, 0);
 			    ls.getGlobal("invoke");
 			    ls.pushJavaObject(c);
-			    ls.call(1, 1);
+			    ls.pushJavaObject(msg);
 			    
 			    int r = ls.toInteger(1);
 			    ls.pop(1);

@@ -22,13 +22,13 @@ import java.util.logging.Logger;
 
 public class Data {
     
-    private ArrayList<String> admins;
-    private HashMap<String, String[]> phrases;
+    public ArrayList<String> admins;
+    public HashMap<String, String[]> phrases;
     private Random r;
     public static Data self;
-    private HashMap<String, String> channels;
-    private String password;
-    private ArrayList<String> commands;
+    public HashMap<String, String> channels;
+    public String password;
+    public ArrayList<String> commands;
     
     // Создаем новый класс
     public Data() {
@@ -92,7 +92,9 @@ public class Data {
     }
     
     public void addCommand(String cmd) {
-	commands.add(cmd);
+	if(!commands.contains(cmd)) {
+	    commands.add(cmd);
+	}
 	File f = new File("lua" + File.separator + cmd + ".lua");
 	
 	if(!f.exists()) {
@@ -101,9 +103,11 @@ public class Data {
 		FileWriter w = new FileWriter(f);
 		BufferedWriter l = new BufferedWriter(w);
 		
-		l.write("function invoke(args)");
+		l.write("function invoke(args, msg)");
 		l.newLine();
-		l.write("-- args - array of arguments");
+		l.write("   -- args - array of arguments");
+		l.newLine();
+		l.write("   -- msg - java message object");
 		l.newLine();
 		l.write("end");
 		l.close();

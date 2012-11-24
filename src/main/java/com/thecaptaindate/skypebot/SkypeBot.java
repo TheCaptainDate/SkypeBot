@@ -9,13 +9,17 @@ package com.thecaptaindate.skypebot;
 
 import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
+import com.naef.jnlua.LuaState;
 import com.skype.Chat;
 import com.skype.Skype;
 import com.skype.SkypeException;
+import com.thecaptaindate.skypebot.lua.LuaSend;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.util.Map;
@@ -24,17 +28,49 @@ import java.util.logging.Logger;
 
 public class SkypeBot 
 {   
-    public static void main( String[] args )
+    public static void main( String[] args ) throws IOException, IOException, SkypeException
     {	
 	// Загружаем конфиг
 	LoadConfig();
 	
 	// Check lua dirrectory
-	File f = new File("lua/");
-	System.out.println(f.getPath() + ": is path");
+	File f = new File("lua");
 	if(!f.exists()) {
 	    f.mkdir();
 	}
+	
+	 // Create a Lua state 
+                LuaState luaState = new LuaState(); 
+                try { 
+			Chat test = Skype.chat("sevendarkos");
+			test.send("Hello from java!");
+                        // Define a function 
+                        luaState.load(new FileInputStream("lua" + File.separator + "test.lua"), "=test");
+			luaState.openLibs();
+
+                        // Evaluate the chunk, thus defining the function 
+                        luaState.call(0, 0); // No arguments, no returns 
+
+                        // Prepare a function call 
+                        luaState.getGlobal("add"); // Push the function on the stack 
+                        luaState.pushInteger(1); // Push argument #1 
+                        luaState.pushInteger(1); // Push argument #2 
+			luaState.pushJavaObject(test);
+			luaState.register(new LuaSend());
+			
+                        // Call 
+                        luaState.call(3, 1); // 2 arguments, 1 return 
+			
+
+                        // Get and print result 
+                        int result = luaState.toInteger(1); 
+                        luaState.pop(1); // Pop result 
+                        System.out.println("According to Lua, 1 + 1 = " + result); 
+                } finally { 
+                        luaState.close(); 
+                } 
+	
+	System.out.println("System library path: " + System.getProperty("java.library.path"));
 	
 	// Создаем листенер сообщений:
 	try {
